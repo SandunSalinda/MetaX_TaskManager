@@ -9,7 +9,7 @@ const handleError = (error: unknown, message = "internal server error", status =
 };
 
 // GET task by ID
-export async function GET(_request: Request, { params }: { params: { id: string } }) { // Added 'export' and types
+export async function GET(_request: Request, { params }: { params: { id: string } }) {
     try {
         await dbConnect();
         const { id } = params;
@@ -19,9 +19,8 @@ export async function GET(_request: Request, { params }: { params: { id: string 
             return NextResponse.json({success: false, error: "Task not found"}, { status: 404 });
         }
         return NextResponse.json({success: true, data: task}, { status: 200 });
-    } catch (error: unknown) { // Changed to 'unknown'
-        // More robust type checking for Mongoose errors
-        if (error instanceof mongoose.Error.CastError) { // Check for Mongoose CastError
+    } catch (error: unknown) {
+        if (error instanceof mongoose.Error.CastError) {
             return handleError(error, "Invalid task ID format.", 400);
         }
         return handleError(error, "Error fetching task.");
@@ -29,12 +28,12 @@ export async function GET(_request: Request, { params }: { params: { id: string 
 }
 
 // PUT update task by ID
-export async function PUT(request: Request, { params }: { params: { id: string } }) { // Changed to 'request' and typed
+export async function PUT(request: Request, { params }: { params: { id: string } }) {
     await dbConnect();
     const { id } = params;
 
     try {
-        const body = await request.json(); // Using 'request' here
+        const body = await request.json();
 
         const updatedTask = await Task.findByIdAndUpdate(id, body, {
             new: true,
@@ -47,11 +46,12 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
         return NextResponse.json({ success: true, data: updatedTask }, { status: 200 });
     } catch (error: unknown) {
-        if (error instanceof mongoose.Error.CastError) { // Check for Mongoose CastError
+        if (error instanceof mongoose.Error.CastError) {
             return handleError(error, "Invalid Task ID format.", 400);
         }
-        if (error instanceof mongoose.Error.ValidationError) { // Check for Mongoose ValidationError
-            const messages = Object.values(error.errors).map(val => (val as any).message); // Still need 'any' for 'val.message' due to complex Mongoose ValidationError structure
+        if (error instanceof mongoose.Error.ValidationError) {
+            // Safely map over validation errors, asserting that each value has a 'message' property
+            const messages = Object.values(error.errors).map((val: { message?: string }) => val.message).filter(Boolean);
             return handleError(error, messages.join(', '), 400);
         }
         return handleError(error, "Error updating task.");
@@ -59,7 +59,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 }
 
 // DELETE /api/tasks/:id - Remove a task
-export async function DELETE(_request: Request, { params }: { params: { id: string } }) { // '_request' explicitly typed
+export async function DELETE(_request: Request, { params }: { params: { id: string } }) {
     await dbConnect();
     const { id } = params;
 
@@ -72,7 +72,7 @@ export async function DELETE(_request: Request, { params }: { params: { id: stri
 
         return NextResponse.json({ success: true, message: "Task deleted successfully." }, { status: 200 });
     } catch (error: unknown) {
-        if (error instanceof mongoose.Error.CastError) { // Check for Mongoose CastError
+        if (error instanceof mongoose.Error.CastError) {
             return handleError(error, "Invalid Task ID format.", 400);
         }
         return handleError(error, "Error deleting task.");
