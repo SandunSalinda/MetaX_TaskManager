@@ -1,16 +1,15 @@
 import dbConnect from "../../../../lib/dbConnect";
 import Task from "../../../../models/Task";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import mongoose from "mongoose";
 
-// Unified error handler
 const handleError = (error: unknown, message = "Internal server error", status = 500) => {
   console.error(error);
   return NextResponse.json({ error: message }, { status });
 };
 
 // GET /api/tasks/[id]
-export async function GET(_: Request, context: { params: Record<string, string> }) {
+export async function GET(_req: NextRequest, context: { params: { id: string } }) {
   try {
     await dbConnect();
     const { id } = context.params;
@@ -28,11 +27,12 @@ export async function GET(_: Request, context: { params: Record<string, string> 
 }
 
 // PUT /api/tasks/[id]
-export async function PUT(request: Request, context: { params: Record<string, string> }) {
-  await dbConnect();
+export async function PUT(req: NextRequest, context: { params: { id: string } }) {
   try {
+    await dbConnect();
+    const body = await req.json();
     const { id } = context.params;
-    const body = await request.json();
+
     const updatedTask = await Task.findByIdAndUpdate(id, body, {
       new: true,
       runValidators: true,
@@ -49,9 +49,7 @@ export async function PUT(request: Request, context: { params: Record<string, st
     }
     if (error instanceof mongoose.Error.ValidationError) {
       const messages = Object.values(error.errors)
-        .map((val) =>
-          val instanceof mongoose.Error.ValidatorError && val.message ? val.message : "Validation error"
-        )
+        .map((val: any) => val.message)
         .filter(Boolean);
       return handleError(error, messages.join(", "), 400);
     }
@@ -60,9 +58,9 @@ export async function PUT(request: Request, context: { params: Record<string, st
 }
 
 // DELETE /api/tasks/[id]
-export async function DELETE(_: Request, context: { params: Record<string, string> }) {
-  await dbConnect();
+export async function DELETE(_req: NextRequest, context: { params: { id: string } }) {
   try {
+    await dbConnect();
     const { id } = context.params;
     const deletedTask = await Task.findByIdAndDelete(id);
 
@@ -70,10 +68,7 @@ export async function DELETE(_: Request, context: { params: Record<string, strin
       return NextResponse.json({ success: false, error: "Task not found." }, { status: 404 });
     }
 
-    return NextResponse.json(
-      { success: true, message: "Task deleted successfully." },
-      { status: 200 }
-    );
+    return NextResponse.json({ success: true, message: "Task deleted successfully." }, { status: 200 });
   } catch (error) {
     if (error instanceof mongoose.Error.CastError) {
       return handleError(error, "Invalid task ID format.", 400);
