@@ -1,5 +1,5 @@
 // components/TaskActions.tsx
-'use client'; // This makes it a Client Component
+'use client';
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -24,14 +24,14 @@ export default function TaskActions({ taskId }: TaskActionsProps) {
 
       if (res.ok) {
         alert('Task deleted successfully!');
-        router.refresh(); // This re-fetches data for the parent Server Component
+        router.refresh();
       } else {
         const errorData = await res.json();
         alert(errorData.error || 'Failed to delete task.');
       }
-    } catch (err: any) {
+    } catch (err: unknown) { // Changed to 'unknown'
       console.error('Error deleting task:', err);
-      alert('An error occurred while deleting the task.');
+      alert(err instanceof Error ? `An error occurred while deleting the task: ${err.message}` : 'An unknown error occurred while deleting the task.');
     }
   };
 

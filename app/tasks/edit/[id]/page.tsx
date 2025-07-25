@@ -1,7 +1,7 @@
 // app/tasks/edit/[id]/page.tsx
 'use client';
 
-import { useState, useEffect, use } from 'react'; // Import 'use' hook
+import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -15,23 +15,22 @@ interface Task {
 }
 
 export default function EditTaskPage({ params }: { params: Promise<{ id: string }> }) {
-  // Use React.use() to unwrap the params Promise as recommended by Next.js
-  const unwrappedParams = use(params);
-  const { id } = unwrappedParams;
 
-  // State to hold task data and form inputs
+  // Use React.use() to unwrap the params Promise as recommended by Next.js
+  const unwrappedParams = use(params);
+  const { id } = unwrappedParams;
+
   const [task, setTask] = useState<Task | null>(null);
   const [title, setTitle] = useState<string>('');
   const [description, setDescription] = useState<string>('');
   const [dueDate, setDueDate] = useState<string>('');
   const [status, setStatus] = useState<'pending' | 'in-progress' | 'completed'>('pending');
 
-  const [loading, setLoading] = useState<boolean>(true); // For initial data fetch
-  const [error, setError] = useState<string | null>(null); // For any errors related to fetch or form submission
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   const router = useRouter();
 
-  // Fetch task data when the component mounts or ID changes
   useEffect(() => {
     const fetchTask = async () => {
       try {
@@ -48,13 +47,12 @@ export default function EditTaskPage({ params }: { params: Promise<{ id: string 
           setTask(data.data);
           setTitle(data.data.title);
           setDescription(data.data.description);
-          // Format for input[type=date]
           setDueDate(data.data.dueDate ? new Date(data.data.dueDate).toISOString().split('T')[0] : '');
           setStatus(data.data.status);
         } else {
           throw new Error(data.error || 'Task data not found.');
         }
-      } catch (err: any) {
+      } catch (err: unknown) { // Changed to 'unknown'
         console.error("Error fetching task:", err);
         setError(err instanceof Error ? err.message : 'An unknown error occurred.');
       } finally {
@@ -68,8 +66,8 @@ export default function EditTaskPage({ params }: { params: Promise<{ id: string 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null); // Clear previous errors
-    setLoading(true); // Indicate form submission loading
+    setError(null);
+    setLoading(true);
 
     if (!title || !description || !dueDate || !status) {
       setError('All fields are required.');
@@ -100,19 +98,19 @@ export default function EditTaskPage({ params }: { params: Promise<{ id: string 
 
       if (res.ok && data.success) {
         router.push('/');
-        router.refresh(); // Re-fetches data for the home page
+        router.refresh();
       } else {
         throw new Error(data.error || 'Failed to update task.');
       }
-    } catch (err: any) {
+    } catch (err: unknown) { // Changed to 'unknown'
       console.error("Error updating task:", err);
       setError(err instanceof Error ? err.message : 'An unexpected error occurred while updating.');
     } finally {
-      setLoading(false); // End loading regardless of success/failure
+      setLoading(false);
     }
   };
 
-  if (loading && !task) { // Show loading only for initial fetch, not for form submission
+  if (loading && !task) {
     return (
       <div className="min-h-screen bg-blue-50 flex items-center justify-center p-4 sm:p-6 lg:p-8">
         <div className="text-center">
@@ -123,7 +121,7 @@ export default function EditTaskPage({ params }: { params: Promise<{ id: string 
     );
   }
 
-  if (error || !task) { // If there's an error or task isn't loaded after trying
+  if (error || !task) {
     return (
       <div className="min-h-screen bg-blue-50 flex items-center justify-center p-4 sm:p-6 lg:p-8">
         <div className="w-full max-w-2xl bg-white rounded-2xl shadow-lg p-8 border border-blue-100 text-center">
@@ -131,20 +129,17 @@ export default function EditTaskPage({ params }: { params: Promise<{ id: string 
               {error ? "Error Loading Task" : "Task Not Found"}
           </h1>
           {error && <p className="text-red-700">{error}</p>}
-          {!task && !error && <p className="text-gray-600">The task with ID "{id}" could not be found.</p>}
+          {!task && !error && <p className="text-gray-600">The task with ID &quot;{id}&quot; could not be found.</p>} {/* Fixed unescaped quotes */}
           <p className="text-gray-600 mt-4">Go back to the <Link href="/" className="text-blue-500 hover:underline">home page</Link>.</p>
         </div>
       </div>
     );
   }
 
-  // Render the form once the task is loaded
   return (
-    // Main container with a light blue background and centered content
     <div className="min-h-screen bg-blue-50 flex items-center justify-center p-4 sm:p-6 lg:p-8">
       <div className="w-full max-w-2xl bg-white rounded-2xl shadow-lg p-8 border border-blue-100">
         <header className="flex flex-col sm:flex-row justify-between items-center mb-8 pb-6 border-b border-blue-100">
-          {/* Back to Home Button with Arrow Icon */}
           <Link href="/" className="
             flex items-center space-x-2 text-blue-600 hover:text-blue-800
             font-medium text-lg transition-colors duration-200 mb-4 sm:mb-0
@@ -159,7 +154,7 @@ export default function EditTaskPage({ params }: { params: Promise<{ id: string 
           </h1>
         </header>
 
-        {error && ( // Display submission error if any
+        {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-lg relative mb-8 shadow-sm" role="alert">
             <strong className="font-bold">Error:</strong>
             <span className="block sm:inline ml-2"> {error}</span>
@@ -222,9 +217,9 @@ export default function EditTaskPage({ params }: { params: Promise<{ id: string 
           <button
             type="submit"
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-6 rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-300 text-lg"
-            disabled={loading} // Disable button during form submission
+            disabled={loading}
           >
-            {loading ? ( // Show spinner and text when loading
+            {loading ? (
               <span className="flex items-center justify-center space-x-2">
                 <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>

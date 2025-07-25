@@ -2,7 +2,7 @@ import dbConnect from "../../../lib/dbConnect";
 import Task from "../../../models/Task";
 import { NextResponse } from "next/server";
 
-export async function GET(request) {
+export async function GET(_request) { // Changed 'request' to '_request' to suppress unused var warning
     try {
         await dbConnect();
         const tasks = await Task.find({});
@@ -12,10 +12,10 @@ export async function GET(request) {
     }
 }
 
-export async function POST(request) {
+export async function POST(_request) { // Changed 'request' to '_request'
     try {
         await dbConnect();
-        const body = await request.json();
+        const body = await _request.json(); // Use _request here
         const { title, description, dueDate } = body;
 
         if (!title || !description || !dueDate) {

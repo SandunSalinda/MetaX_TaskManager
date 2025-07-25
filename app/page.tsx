@@ -32,7 +32,7 @@ export default async function HomePage() {
       throw new Error(data.error || 'Failed to fetch tasks: success was false');
     }
   }
-  catch (err: any) {
+  catch (err: unknown) { // Changed to 'unknown'
     if (process.env.NODE_ENV === 'development') {
       console.error('Error fetching tasks:', err);
     }
@@ -40,9 +40,8 @@ export default async function HomePage() {
   }
 
   return (
-    // Overall page container with a very light blue background and increased vertical padding
     <div className="min-h-screen bg-blue-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="container mx-auto max-w-7xl"> 
+      <div className="container mx-auto max-w-6xl">
         <header className="flex flex-col sm:flex-row justify-between items-center mb-12 p-8 bg-white rounded-2xl shadow-lg border border-blue-100">
           <h1 className="text-4xl font-extrabold text-blue-700 mb-6 sm:mb-0 text-center sm:text-left tracking-tight">
             Task Manager
@@ -66,17 +65,14 @@ export default async function HomePage() {
           </div>
         )}
 
-        {/* Main content grid: sidebar for calendar and main task list */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8"> {/* Adjusted grid for sidebar */}
-          {/* Calendar Sidebar */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           <div className="lg:col-span-1">
             <SimpleCalendar />
           </div>
 
-          {/* Main Task List Area */}
-          <div className="lg:col-span-3"> 
+          <div className="lg:col-span-3">
             {tasks.length === 0 && !error ? (
-              <div className="bg-white p-12 rounded-2xl shadow-lg border border-blue-100 text-center mt-0"> {/* Removed mt-12, aligned with grid */}
+              <div className="bg-white p-12 rounded-2xl shadow-lg border border-blue-100 text-center mt-0">
                 <p className="text-gray-700 text-3xl font-semibold mb-4">
                   No tasks found.
                 </p>
@@ -85,14 +81,13 @@ export default async function HomePage() {
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8"> {/* Adjusted to 2-3 columns within its 3-column parent */}
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
                 {tasks.map((task) => (
                   <div key={task._id} className={`
                     bg-white rounded-2xl shadow-md p-6 border border-blue-100
                     transform transition-all duration-300 hover:scale-[1.01] hover:shadow-lg
                     flex flex-col relative overflow-hidden
                     ${
-                      // colored top border based on status
                       task.status === 'pending' ? 'border-t-4 border-yellow-500' :
                       task.status === 'in-progress' ? 'border-t-4 border-blue-500' :
                       'border-t-4 border-green-500'

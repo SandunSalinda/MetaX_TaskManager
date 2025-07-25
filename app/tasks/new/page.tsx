@@ -18,7 +18,7 @@ export default function CreateTaskPage() {
   const [dueDate, setDueDate] = useState<string>('');
   const [status, setStatus] = useState<'pending' | 'in-progress' | 'completed'>('pending');
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(false); // For form submission loading
+  const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -38,7 +38,7 @@ export default function CreateTaskPage() {
       title,
       description,
       dueDate: formattedDueDate,
-      status, // Include status in new task data
+      status,
     };
 
     try {
@@ -59,7 +59,7 @@ export default function CreateTaskPage() {
 
       router.push('/');
       router.refresh();
-    } catch (err: any) {
+    } catch (err: unknown) { // Changed to 'unknown'
       if (process.env.NODE_ENV === 'development') {
         console.error('Error creating task:', err);
       }
@@ -70,11 +70,9 @@ export default function CreateTaskPage() {
   };
 
   return (
-    // Main container with a light blue background and centered content
     <div className="min-h-screen bg-blue-50 flex items-center justify-center p-4 sm:p-6 lg:p-8">
       <div className="w-full max-w-2xl bg-white rounded-2xl shadow-lg p-8 border border-blue-100">
         <header className="flex flex-col sm:flex-row justify-between items-center mb-8 pb-6 border-b border-blue-100">
-          {/* Back to Home Button with Arrow Icon */}
           <Link href="/" className="
             flex items-center space-x-2 text-blue-600 hover:text-blue-800
             font-medium text-lg transition-colors duration-200 mb-4 sm:mb-0

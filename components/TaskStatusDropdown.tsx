@@ -16,8 +16,8 @@ export default function TaskStatusDropdown({ taskId, initialStatus }: TaskStatus
 
   const handleStatusChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newStatus = e.target.value as 'pending' | 'in-progress' | 'completed';
-    setStatus(newStatus); // Optimistically update UI
-    setUpdating(true); // Show loading state
+    setStatus(newStatus);
+    setUpdating(true);
 
     try {
       const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
@@ -26,25 +26,22 @@ export default function TaskStatusDropdown({ taskId, initialStatus }: TaskStatus
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ status: newStatus }), // Only send the status field
+        body: JSON.stringify({ status: newStatus }),
       });
 
       const data = await res.json();
 
       if (!res.ok || !data.success) {
-        // If update fails, revert UI and show error
-        setStatus(initialStatus); // Revert to original status
+        setStatus(initialStatus);
         throw new Error(data.error || 'Failed to update task status.');
       }
 
-      // On success, the UI is already updated.
-      // Trigger a refresh of the home page to ensure consistency, especially if other data is fetched.
       router.refresh();
 
-    } catch (err: any) {
+    } catch (err: unknown) { // Changed to 'unknown'
       console.error('Error updating task status:', err);
-      alert(`Error updating status: ${err.message}`);
-      setStatus(initialStatus); // Revert on error
+      alert(err instanceof Error ? `Error updating status: ${err.message}` : 'An unknown error occurred while updating status.');
+      setStatus(initialStatus);
     } finally {
       setUpdating(false);
     }
@@ -53,10 +50,10 @@ export default function TaskStatusDropdown({ taskId, initialStatus }: TaskStatus
   return (
     <div className="relative inline-block">
       <select
-        id={`status-${taskId}`} // Unique ID for each dropdown
+        id={`status-${taskId}`}
         value={status}
         onChange={handleStatusChange}
-        disabled={updating} // Disable during update
+        disabled={updating}
         className={`
           appearance-none px-3.5 py-1.5 text-sm font-semibold rounded-full border-2 focus:outline-none focus:ring-2
           transition-all duration-200 cursor-pointer
