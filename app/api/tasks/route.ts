@@ -3,7 +3,7 @@ import Task from "../../../models/Task";
 import { NextResponse } from "next/server";
 
 // GET /api/tasks
-export async function GET(_: Request) {
+export async function GET() {
   try {
     await dbConnect();
     const tasks = await Task.find({});

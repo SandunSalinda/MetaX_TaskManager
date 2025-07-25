@@ -3,20 +3,16 @@ import dbConnect from "../../../../lib/dbConnect";
 import Task from "../../../../models/Task";
 import mongoose from "mongoose";
 
-interface Context {
-  params: { id: string };
-}
-
 const handleError = (error: unknown, message = "Internal server error", status = 500) => {
   console.error(error);
   return NextResponse.json({ error: message }, { status });
 };
 
 // GET /api/tasks/[id]
-export async function GET(_req: NextRequest, { params }: Context) {
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     await dbConnect();
-    const { id } = params;
+    const { id } = await params;
     const task = await Task.findById(id);
     if (!task) {
       return NextResponse.json({ success: false, error: "Task not found" }, { status: 404 });
@@ -31,11 +27,11 @@ export async function GET(_req: NextRequest, { params }: Context) {
 }
 
 // PUT /api/tasks/[id]
-export async function PUT(req: NextRequest, { params }: Context) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     await dbConnect();
     const body = await req.json();
-    const { id } = params;
+    const { id } = await params;
 
     const updatedTask = await Task.findByIdAndUpdate(id, body, {
       new: true,
@@ -68,10 +64,10 @@ export async function PUT(req: NextRequest, { params }: Context) {
 }
 
 // DELETE /api/tasks/[id]
-export async function DELETE(_req: NextRequest, { params }: Context) {
+export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     await dbConnect();
-    const { id } = params;
+    const { id } = await params;
     const deletedTask = await Task.findByIdAndDelete(id);
 
     if (!deletedTask) {
