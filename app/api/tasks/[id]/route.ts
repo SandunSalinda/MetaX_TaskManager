@@ -9,6 +9,7 @@ const handleError = (error: unknown, message = "internal server error", status =
 };
 
 // GET task by ID
+// Corrected type signature for the second argument to directly be { params: { id: string } }
 export async function GET(_request: Request, { params }: { params: { id: string } }) {
     try {
         await dbConnect();
@@ -28,6 +29,7 @@ export async function GET(_request: Request, { params }: { params: { id: string 
 }
 
 // PUT update task by ID
+// Corrected type signature for the second argument to directly be { params: { id: string } }
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
     await dbConnect();
     const { id } = params;
@@ -50,7 +52,6 @@ export async function PUT(request: Request, { params }: { params: { id: string }
             return handleError(error, "Invalid Task ID format.", 400);
         }
         if (error instanceof mongoose.Error.ValidationError) {
-            // Safely map over validation errors, asserting that each value has a 'message' property
             const messages = Object.values(error.errors).map((val: { message?: string }) => val.message).filter(Boolean);
             return handleError(error, messages.join(', '), 400);
         }
@@ -59,6 +60,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 }
 
 // DELETE /api/tasks/:id - Remove a task
+// Corrected type signature for the second argument to directly be { params: { id: string } }
 export async function DELETE(_request: Request, { params }: { params: { id: string } }) {
     await dbConnect();
     const { id } = params;
