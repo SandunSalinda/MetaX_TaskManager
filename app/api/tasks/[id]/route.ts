@@ -3,14 +3,21 @@ import Task from "../../../../models/Task";
 import { NextResponse } from "next/server";
 import mongoose from "mongoose"; // Import mongoose to access its Error types
 
+// Define an interface for the route handler context, including params
+interface RouteContext {
+    params: {
+        id: string;
+    };
+}
+
 const handleError = (error: unknown, message = "internal server error", status = 500) => {
     console.error(error);
     return NextResponse.json({ error: message }, { status });
 };
 
 // GET task by ID
-// Refined type signature: name the context object and destructure params inside
-export async function GET(_request: Request, context: { params: { id: string } }) {
+// Using the defined RouteContext interface
+export async function GET(_request: Request, context: RouteContext) {
     try {
         await dbConnect();
         const { id } = context.params; // Destructure id from context.params
@@ -29,8 +36,8 @@ export async function GET(_request: Request, context: { params: { id: string } }
 }
 
 // PUT update task by ID
-// Refined type signature: name the context object and destructure params inside
-export async function PUT(request: Request, context: { params: { id: string } }) {
+// Using the defined RouteContext interface
+export async function PUT(request: Request, context: RouteContext) {
     await dbConnect();
     const { id } = context.params; // Destructure id from context.params
 
@@ -60,8 +67,8 @@ export async function PUT(request: Request, context: { params: { id: string } })
 }
 
 // DELETE /api/tasks/:id - Remove a task
-// Refined type signature: name the context object and destructure params inside
-export async function DELETE(_request: Request, context: { params: { id: string } }) {
+// Using the defined RouteContext interface
+export async function DELETE(_request: Request, context: RouteContext) {
     await dbConnect();
     const { id } = context.params; // Destructure id from context.params
 
