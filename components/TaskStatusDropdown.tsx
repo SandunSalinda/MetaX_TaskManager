@@ -20,11 +20,8 @@ export default function TaskStatusDropdown({ taskId, initialStatus }: TaskStatus
     setUpdating(true);
 
     try {
-      // Use relative URL in production, full URL in development
-      const baseUrl = process.env.NODE_ENV === 'production' 
-        ? '' 
-        : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000');
-      const res = await fetch(`${baseUrl}/api/tasks/${taskId}`, {
+      // Use relative URL for client-side requests
+      const res = await fetch(`/api/tasks/${taskId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

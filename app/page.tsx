@@ -2,6 +2,7 @@ import Link from 'next/link';
 import TaskActions from '@/components/TaskActions';
 import TaskStatusDropdown from '@/components/TaskStatusDropdown';
 import SimpleCalendar from '@/components/SimpleCalender';
+import { getBaseUrl } from '@/lib/getBaseUrl';
 
 interface Task {
   _id: string;
@@ -16,10 +17,8 @@ export default async function HomePage() {
   let error: string | null = null;
 
   try{
-    // Use relative URL in production, full URL in development
-    const baseUrl = process.env.NODE_ENV === 'production' 
-      ? '' 
-      : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000');
+    // For server-side rendering, we need to use the full URL
+    const baseUrl = getBaseUrl();
     const res = await fetch(`${baseUrl}/api/tasks`, {
       cache: 'no-store',
     });
