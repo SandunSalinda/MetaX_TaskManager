@@ -2,6 +2,8 @@ import Link from 'next/link';
 import TaskActions from '@/components/TaskActions';
 import TaskStatusDropdown from '@/components/TaskStatusDropdown';
 import SimpleCalendar from '@/components/SimpleCalender';
+import { getBaseUrl } from '@/lib/getBaseUrl';
+
 interface Task {
   _id: string;
   title: string;
@@ -15,7 +17,8 @@ export default async function HomePage() {
   let error: string | null = null;
 
   try{
-    const res = await fetch(`/api/tasks`, {
+    const baseUrl = getBaseUrl();
+    const res = await fetch(`${baseUrl}/api/tasks`, {
       cache: 'no-store',
     });
     
