@@ -9,7 +9,7 @@ const handleError = (error: unknown, message = "Internal server error", status =
   return NextResponse.json({ error: message }, { status });
 };
 
-// GET /api/tasks/[id] - Get a task by ID
+// GET /api/tasks/[id]
 export async function GET(_: Request, { params }: { params: { id: string } }) {
   try {
     await dbConnect();
@@ -26,7 +26,7 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
   }
 }
 
-// PUT /api/tasks/[id] - Update a task by ID
+// PUT /api/tasks/[id]
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
   await dbConnect();
   try {
@@ -45,17 +45,25 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     if (error instanceof mongoose.Error.CastError) {
       return handleError(error, "Invalid task ID format.", 400);
     }
+
     if (error instanceof mongoose.Error.ValidationError) {
       const messages = Object.values(error.errors)
-        .map((val: any) => val.message)
+        .map((val) => {
+          if (val instanceof mongoose.Error.ValidatorError && val.message) {
+            return val.message;
+          }
+          return "Validation error";
+        })
         .filter(Boolean);
+
       return handleError(error, messages.join(", "), 400);
     }
+
     return handleError(error, "Error updating task.");
   }
 }
 
-// DELETE /api/tasks/[id] - Delete a task by ID
+// DELETE /api/tasks/[id]
 export async function DELETE(_: Request, { params }: { params: { id: string } }) {
   await dbConnect();
   try {
