@@ -24,14 +24,16 @@ export default async function HomePage() {
     });
     
     if (!res.ok) {
-      // Try to get JSON error first, then fall back to text
+      // Read the response body once as text first
+      const responseText = await res.text();
       let errorMessage = `HTTP ${res.status}: ${res.statusText}`;
+      
       try {
-        const errorData = await res.json();
+        // Try to parse the text as JSON
+        const errorData = JSON.parse(responseText);
         errorMessage = errorData.error || errorMessage;
       } catch {
-        // If JSON parsing fails, get the raw response
-        const responseText = await res.text();
+        // If JSON parsing fails, use the raw text
         errorMessage = responseText.substring(0, 200) || errorMessage;
       }
       throw new Error(errorMessage);
