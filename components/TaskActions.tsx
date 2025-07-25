@@ -1,0 +1,51 @@
+// components/TaskActions.tsx
+'use client'; // This makes it a Client Component
+
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+
+interface TaskActionsProps {
+  taskId: string;
+}
+
+export default function TaskActions({ taskId }: TaskActionsProps) {
+  const router = useRouter();
+
+  const handleDelete = async () => {
+    if (!window.confirm('Are you sure you want to delete this task?')) {
+      return;
+    }
+
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+      const res = await fetch(`${baseUrl}/api/tasks/${taskId}`, {
+        method: 'DELETE',
+      });
+
+      if (res.ok) {
+        alert('Task deleted successfully!');
+        router.refresh(); // This re-fetches data for the parent Server Component
+      } else {
+        const errorData = await res.json();
+        alert(errorData.error || 'Failed to delete task.');
+      }
+    } catch (err: any) {
+      console.error('Error deleting task:', err);
+      alert('An error occurred while deleting the task.');
+    }
+  };
+
+  return (
+    <div className="flex justify-end space-x-3">
+      <Link href={`/tasks/edit/${taskId}`} className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-1.5 px-3 rounded-md text-sm transition duration-300">
+        Edit
+      </Link>
+      <button
+        onClick={handleDelete}
+        className="bg-red-500 hover:bg-red-600 text-white font-medium py-1.5 px-3 rounded-md text-sm transition duration-300"
+      >
+        Delete
+      </button>
+    </div>
+  );
+}
