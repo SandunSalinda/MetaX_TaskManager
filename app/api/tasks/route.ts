@@ -2,17 +2,17 @@ import dbConnect from "../../../lib/dbConnect";
 import Task from "../../../models/Task";
 import { NextResponse } from "next/server";
 
-export async function GET(_request) { // Changed 'request' to '_request' to suppress unused var warning
+export async function GET(_request: Request) { // Added 'export' and ': Request' type, changed to _request
     try {
         await dbConnect();
         const tasks = await Task.find({});
         return NextResponse.json({ success: true, data: tasks }, { status: 200 });
-    } catch (error) {
-        return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    } catch (error: unknown) { // Changed to 'unknown' for type safety
+        return NextResponse.json({ success: false, error: error instanceof Error ? error.message : "An unknown error occurred" }, { status: 500 });
     }
 }
 
-export async function POST(_request) { // Changed 'request' to '_request'
+export async function POST(_request: Request) { // Added 'export' and ': Request' type, changed to _request
     try {
         await dbConnect();
         const body = await _request.json(); // Use _request here
@@ -30,7 +30,7 @@ export async function POST(_request) { // Changed 'request' to '_request'
 
         await newTask.save();
         return NextResponse.json({ success: true, data: newTask }, { status: 201 });
-    } catch (error) {
-        return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    } catch (error: unknown) { // Changed to 'unknown' for type safety
+        return NextResponse.json({ success: false, error: error instanceof Error ? error.message : "An unknown error occurred" }, { status: 500 });
     }
 }
