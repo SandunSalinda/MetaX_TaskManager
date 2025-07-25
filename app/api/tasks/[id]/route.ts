@@ -3,20 +3,23 @@ import Task from "../../../../models/Task";
 import { NextRequest, NextResponse } from "next/server";
 import mongoose from "mongoose";
 
+// Helper function to return consistent error responses
 const handleError = (error: unknown, message = "Internal server error", status = 500) => {
   console.error(error);
   return NextResponse.json({ error: message }, { status });
 };
 
-// GET /api/tasks/[id]
+// GET /api/tasks/[id] - Fetch a task by ID
 export async function GET(_req: NextRequest, context: { params: { id: string } }) {
   try {
     await dbConnect();
     const { id } = context.params;
     const task = await Task.findById(id);
+
     if (!task) {
       return NextResponse.json({ success: false, error: "Task not found" }, { status: 404 });
     }
+
     return NextResponse.json({ success: true, data: task }, { status: 200 });
   } catch (error) {
     if (error instanceof mongoose.Error.CastError) {
@@ -26,12 +29,12 @@ export async function GET(_req: NextRequest, context: { params: { id: string } }
   }
 }
 
-// PUT /api/tasks/[id]
+// PUT /api/tasks/[id] - Update a task
 export async function PUT(req: NextRequest, context: { params: { id: string } }) {
   try {
     await dbConnect();
-    const body = await req.json();
     const { id } = context.params;
+    const body = await req.json();
 
     const updatedTask = await Task.findByIdAndUpdate(id, body, {
       new: true,
@@ -47,21 +50,29 @@ export async function PUT(req: NextRequest, context: { params: { id: string } })
     if (error instanceof mongoose.Error.CastError) {
       return handleError(error, "Invalid task ID format.", 400);
     }
+
     if (error instanceof mongoose.Error.ValidationError) {
       const messages = Object.values(error.errors)
-        .map((val: any) => val.message)
+        .map((val) =>
+          val instanceof mongoose.Error.ValidatorError || val instanceof mongoose.Error.CastError
+            ? val.message
+            : "Invalid input"
+        )
         .filter(Boolean);
+
       return handleError(error, messages.join(", "), 400);
     }
+
     return handleError(error, "Error updating task.");
   }
 }
 
-// DELETE /api/tasks/[id]
+// DELETE /api/tasks/[id] - Remove a task
 export async function DELETE(_req: NextRequest, context: { params: { id: string } }) {
   try {
     await dbConnect();
     const { id } = context.params;
+
     const deletedTask = await Task.findByIdAndDelete(id);
 
     if (!deletedTask) {
