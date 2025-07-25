@@ -16,7 +16,10 @@ export default async function HomePage() {
   let error: string | null = null;
 
   try{
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+    // Use relative URL in production, full URL in development
+    const baseUrl = process.env.NODE_ENV === 'production' 
+      ? '' 
+      : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000');
     const res = await fetch(`${baseUrl}/api/tasks`, {
       cache: 'no-store',
     });
