@@ -5,10 +5,19 @@ import { NextResponse } from "next/server";
 // GET /api/tasks
 export async function GET() {
   try {
+    console.log('API /api/tasks called');
+    console.log('MONGODB_URI exists:', !!process.env.MONGODB_URI);
+    console.log('NODE_ENV:', process.env.NODE_ENV);
+    
     await dbConnect();
+    console.log('Database connected successfully');
+    
     const tasks = await Task.find({});
+    console.log('Tasks found:', tasks.length);
+    
     return NextResponse.json({ success: true, data: tasks }, { status: 200 });
   } catch (error) {
+    console.error('API Error:', error);
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : "An unknown error occurred",

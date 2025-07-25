@@ -24,8 +24,17 @@ export default async function HomePage() {
     });
     
     if (!res.ok) {
-      const errorData = await res.json().catch(() => ({ error: 'Unknown error' }));
-      throw new Error(errorData.error || `HTTP error! status: ${res.status}`);
+      // Try to get JSON error first, then fall back to text
+      let errorMessage = `HTTP ${res.status}: ${res.statusText}`;
+      try {
+        const errorData = await res.json();
+        errorMessage = errorData.error || errorMessage;
+      } catch {
+        // If JSON parsing fails, get the raw response
+        const responseText = await res.text();
+        errorMessage = responseText.substring(0, 200) || errorMessage;
+      }
+      throw new Error(errorMessage);
     }
 
     const data = await res.json();
