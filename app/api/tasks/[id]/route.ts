@@ -9,11 +9,11 @@ const handleError = (error: unknown, message = "internal server error", status =
 };
 
 // GET task by ID
-// Corrected type signature for the second argument to directly be { params: { id: string } }
-export async function GET(_request: Request, { params }: { params: { id: string } }) {
+// Refined type signature: name the context object and destructure params inside
+export async function GET(_request: Request, context: { params: { id: string } }) {
     try {
         await dbConnect();
-        const { id } = params;
+        const { id } = context.params; // Destructure id from context.params
 
         const task = await Task.findById(id);
         if (!task) {
@@ -29,10 +29,10 @@ export async function GET(_request: Request, { params }: { params: { id: string 
 }
 
 // PUT update task by ID
-// Corrected type signature for the second argument to directly be { params: { id: string } }
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+// Refined type signature: name the context object and destructure params inside
+export async function PUT(request: Request, context: { params: { id: string } }) {
     await dbConnect();
-    const { id } = params;
+    const { id } = context.params; // Destructure id from context.params
 
     try {
         const body = await request.json();
@@ -60,10 +60,10 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 }
 
 // DELETE /api/tasks/:id - Remove a task
-// Corrected type signature for the second argument to directly be { params: { id: string } }
-export async function DELETE(_request: Request, { params }: { params: { id: string } }) {
+// Refined type signature: name the context object and destructure params inside
+export async function DELETE(_request: Request, context: { params: { id: string } }) {
     await dbConnect();
-    const { id } = params;
+    const { id } = context.params; // Destructure id from context.params
 
     try {
         const deletedTask = await Task.findByIdAndDelete(id);
