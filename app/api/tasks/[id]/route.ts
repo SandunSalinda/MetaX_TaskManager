@@ -3,17 +3,18 @@ import Task from "../../../../models/Task";
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 
-// Helper: Uniform error response
+// Unified error handler
 const handleError = (error: unknown, message = "Internal server error", status = 500) => {
   console.error(error);
   return NextResponse.json({ error: message }, { status });
 };
 
 // GET /api/tasks/[id]
-export async function GET(_: Request, { params }: { params: { id: string } }) {
+export async function GET(_: Request, context: { params: Record<string, string> }) {
   try {
     await dbConnect();
-    const task = await Task.findById(params.id);
+    const { id } = context.params;
+    const task = await Task.findById(id);
     if (!task) {
       return NextResponse.json({ success: false, error: "Task not found" }, { status: 404 });
     }
@@ -27,11 +28,12 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
 }
 
 // PUT /api/tasks/[id]
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, context: { params: Record<string, string> }) {
   await dbConnect();
   try {
+    const { id } = context.params;
     const body = await request.json();
-    const updatedTask = await Task.findByIdAndUpdate(params.id, body, {
+    const updatedTask = await Task.findByIdAndUpdate(id, body, {
       new: true,
       runValidators: true,
     });
@@ -45,29 +47,24 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     if (error instanceof mongoose.Error.CastError) {
       return handleError(error, "Invalid task ID format.", 400);
     }
-
     if (error instanceof mongoose.Error.ValidationError) {
       const messages = Object.values(error.errors)
-        .map((val) => {
-          if (val instanceof mongoose.Error.ValidatorError && val.message) {
-            return val.message;
-          }
-          return "Validation error";
-        })
+        .map((val) =>
+          val instanceof mongoose.Error.ValidatorError && val.message ? val.message : "Validation error"
+        )
         .filter(Boolean);
-
       return handleError(error, messages.join(", "), 400);
     }
-
     return handleError(error, "Error updating task.");
   }
 }
 
 // DELETE /api/tasks/[id]
-export async function DELETE(_: Request, { params }: { params: { id: string } }) {
+export async function DELETE(_: Request, context: { params: Record<string, string> }) {
   await dbConnect();
   try {
-    const deletedTask = await Task.findByIdAndDelete(params.id);
+    const { id } = context.params;
+    const deletedTask = await Task.findByIdAndDelete(id);
 
     if (!deletedTask) {
       return NextResponse.json({ success: false, error: "Task not found." }, { status: 404 });
