@@ -22,8 +22,9 @@ export default async function HomePage() {
     const res = await fetch(`${baseUrl}/api/tasks`, {
       cache: 'no-store',
     });
+    
     if (!res.ok) {
-      const errorData = await res.json();
+      const errorData = await res.json().catch(() => ({ error: 'Unknown error' }));
       throw new Error(errorData.error || `HTTP error! status: ${res.status}`);
     }
 

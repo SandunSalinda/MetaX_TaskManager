@@ -13,5 +13,7 @@ export function getBaseUrl() {
     return process.env.NEXT_PUBLIC_API_URL;
   }
 
-  return 'http://localhost:3000';
+  // Default fallback - try to detect the port from Next.js
+  const port = process.env.PORT || '3000';
+  return `http://localhost:${port}`;
 }
